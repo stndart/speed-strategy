@@ -10,22 +10,30 @@ def turn_angle(coords: np.ndarray[float], speed_vec: np.ndarray[float], target: 
     d = target - coords
     return signed_angle(speed_vec, d)
 
-def simulate(start_speed: float, start_angle: float,
+# runs simulation of strategy until target.x is achieved or until coords.y hits 0
+def simulate(target: np.ndarray[float],
+             start_speed: float, start_angle: float,
              acceleration: float, rotation: Callable[[float], float],
-             max_time: float = 10.0,
-             precision: float = PRECISION):
+             delta: float = PRECISION):
     coords = np.array([0, 0], dtype=float)
-    speed_vec = np.array([np.cos(start_angle), np.sin(start_angle)], dtype=float) * start_speed
+    speed_vec = rotate(np.array([1, 0]), -start_angle)
     speed = start_speed
     t: float = 0.0
-    while coords[1] >= 0 and t < max_time:
-        coords += speed_vec * speed * precision
-        if turn_angle(coords, speed_vec, )
+    while coords[1] >= 0 and coords[0] <= target[0] and speed > 0:
+        coords += speed * speed_vec * delta
 
-        omega = rotation(speed) * precision
-        speed_vec = rotate(speed_vec, omega)
-        speed += acceleration * precision
-        t += precision
-
-        # print(coords, speed_vec, speed)
+        max_angle = turn_angle(coords, speed_vec, target)
+        angle = rotation(speed) * delta
+        if abs(angle) > abs(max_angle):
+            angle = max_angle
+            speed += acceleration * delta
+        speed_vec = rotate(speed_vec, angle)
+        t += delta
+    
     return t, coords
+
+def achieve(target: np.ndarray[float],
+            start_speed: float, start_angle: float,
+            max_acceleration: float, rotation: Callable[[float], float],
+            delta: float = PRECISION):
+    return simulate(target, start_speed, start_angle, max_acceleration, rotation, delta=delta)

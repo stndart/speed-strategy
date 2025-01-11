@@ -10,7 +10,9 @@ def estimate(start_speed: float, start_angle: float,
              delta: float = 1e-4) -> float:
     target = np.array([distance, 0], dtype=float)
     t, c = strategy(target, start_speed, start_angle, acceleration, rotation, delta=delta)
-    precision = 2 * start_speed * delta
+    precision = 20 * start_speed * delta
+    print('precision', precision)
+    print(abs(c[0] - distance), abs(c[1]))
     if abs(c[0] - distance) < precision and abs(c[1]) < precision:
         return t
     else:

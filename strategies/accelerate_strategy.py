@@ -3,9 +3,9 @@ from typing import Callable
 from .common import *
 
 # runs simulation of strategy until target.x is achieved or until coords.y hits 0
-def simulate(start_speed: float, start_angle: float,
+def simulate(target: np.ndarray[float],
+             start_speed: float, start_angle: float,
              acceleration: float, rotation: Callable[[float], float],
-             target: np.ndarray[float],
              delta: float = PRECISION):
     coords = np.array([0, 0], dtype=float)
     speed_vec = rotate(np.array([1, 0]), -start_angle)
@@ -26,7 +26,7 @@ def achieve(target: np.ndarray[float],
             start_speed: float, start_angle: float,
             max_acceleration: float, rotation: Callable[[float], float],
             delta: float = PRECISION):
-    t, s = simulate(start_speed, start_angle, max_acceleration, rotation, target, delta=delta)
+    t, s = simulate(target, start_speed, start_angle, max_acceleration, rotation, delta=delta)
     
     # we achieved x = x before y = 0, => going too fast
     if s[1] >= 0:
@@ -43,7 +43,7 @@ def achieve(target: np.ndarray[float],
             delta=delta)
         rot = make_rotation(rotation, rot_mod)
         acceleration = max_acceleration
-    return simulate(start_speed, start_angle, acceleration, rot, target, delta=delta)
+    return simulate(target, start_speed, start_angle, acceleration, rot, delta=delta)
 
 # achieves target by lowering acceleration
 def achieve_acceleration(target: np.ndarray[float],
@@ -52,15 +52,11 @@ def achieve_acceleration(target: np.ndarray[float],
             delta: float = PRECISION, precision: float = BPRECISION):
     # probably won't achieve
     L = -1
-    # checks if we even can achieve:
-    t, s = simulate(start_speed, start_angle, 0, rotation, target, delta=delta)
-    if s[1] >= 0:
-        return -1
     # too fast
     R = 1
     while R - L > precision:
         m = (L + R) / 2
-        t, s = simulate(start_speed, start_angle, max_acceleration * m, rotation, target, delta=delta)
+        t, s = simulate(target, start_speed, start_angle, max_acceleration * m, rotation, delta=delta)
         # still too fast
         if s[1] >= 0:
             R = m
@@ -83,8 +79,9 @@ def achieve_rotation(target: np.ndarray[float],
     R = 1
     while R - L > precision:
         m = (L + R) / 2
-        t, s = simulate(start_speed, start_angle, max_acceleration * m, rotation, target, delta=delta)
+        t, s = simulate(target, start_speed, start_angle, max_acceleration, make_rotation(rotation, m), delta=delta)
         # still too fast rotation
+        # print(m, s[1])
         if s[1] < 0:
             R = m
         else:
