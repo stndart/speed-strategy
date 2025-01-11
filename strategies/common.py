@@ -2,7 +2,7 @@ import numpy as np
 from scipy.spatial.transform import Rotation as R
 
 PRECISION = 1e-2
-BPRECISION = 1e-6
+BPRECISION = 1e-4
 ROT_CONST = 10.0
 
 def rotate(x: np.ndarray[float], angle: float) -> np.ndarray[float]:

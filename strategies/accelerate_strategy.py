@@ -29,6 +29,7 @@ def achieve(target: np.ndarray[float],
     t, s = simulate(target, start_speed, start_angle, max_acceleration, rotation, delta=delta)
     
     # we achieved x = x before y = 0, => going too fast
+    old_s = s
     if s[1] >= 0:
         acc_mod = achieve_acceleration(target,
             start_speed, start_angle,
@@ -43,7 +44,12 @@ def achieve(target: np.ndarray[float],
             delta=delta)
         rot = make_rotation(rotation, rot_mod)
         acceleration = max_acceleration
-    return simulate(target, start_speed, start_angle, acceleration, rot, delta=delta)
+    t, s = simulate(target, start_speed, start_angle, acceleration, rot, delta=delta)
+    if old_s[1] >= 0:
+        flag = s[1] < 0
+    else:
+        flag = s[1] >= 0
+    return t, s, flag
 
 # achieves target by lowering acceleration
 def achieve_acceleration(target: np.ndarray[float],
@@ -62,7 +68,7 @@ def achieve_acceleration(target: np.ndarray[float],
             R = m
         else:
             L = m
-    return R
+    return L
 
 def make_rotation(rotation: Callable[[float], float], rot_mod: float):
     def func(speed: float):
@@ -86,4 +92,4 @@ def achieve_rotation(target: np.ndarray[float],
             R = m
         else:
             L = m
-    return R
+    return L

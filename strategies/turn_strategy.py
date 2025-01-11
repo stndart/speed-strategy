@@ -36,4 +36,6 @@ def achieve(target: np.ndarray[float],
             start_speed: float, start_angle: float,
             max_acceleration: float, rotation: Callable[[float], float],
             delta: float = PRECISION):
-    return simulate(target, start_speed, start_angle, max_acceleration, rotation, delta=delta)
+    t, c = simulate(target, start_speed, start_angle, max_acceleration, rotation, delta=delta)
+    probable_angle = -start_angle + rotation(start_speed) * t
+    return t, c, probable_angle > 0
