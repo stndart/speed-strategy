@@ -1,22 +1,25 @@
 import numpy as np
 from typing import Callable
+from .accelerate_strategy import simulate as ac_sim, achieve as ac_ac
+# from .turn_strategy import simulate as ts_sim, achieve as ts_ac
 
-def estimate(start_speed: float, acceleration: float,
+def estimate(start_speed: float, start_angle: float,
+             acceleration: float,
              distance: float, strategy: Callable,
              rotation: Callable[[float], float],
-             precision: float = 1e-4) -> float:
-    def success(angle: float):
-        return strategy(start_speed, angle, acceleration, rotation)[1][0] < distance
+             delta: float = 1e-4) -> float:
+    target = np.array([distance, 0], dtype=float)
+    t, c = strategy(target, start_speed, start_angle, acceleration, rotation, delta=delta)
+    precision = 2 * start_speed * delta
+    if abs(c[0] - distance) < precision and abs(c[1]) < precision:
+        return t
+    else:
+        return float('inf')
 
-    if success(np.pi / 2):
-        return np.pi / 2
-    
-    L = 0
-    R = np.pi / 2
-    while R - L > precision:
-        m = (L + R) / 2
-        if success(m):
-            L = m
-        else:
-            R = m
-    return L
+def compare(start_speed: float, acceleration: float,
+            start_angle: float,
+            distance: float, strategies: list[Callable],
+            rotation: Callable[[float], float],
+            delta: float = 1e-4) -> list[float]:
+    res = [estimate(start_speed, start_angle, acceleration, distance, s, rotation, delta=delta) for s in strategies]
+    return res
