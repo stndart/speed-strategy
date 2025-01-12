@@ -1,7 +1,5 @@
 import numpy as np
 from typing import Callable
-from .accelerate_strategy import simulate as ac_sim, achieve as ac_ac
-# from .turn_strategy import simulate as ts_sim, achieve as ts_ac
 
 def estimate(start_speed: float, start_angle: float,
              acceleration: float,
